@@ -40,8 +40,8 @@
 
     <section class="summary" aria-label="Status summary">
       <div class="stat"><span class="stat-num" id="countAll">0</span><span class="stat-label">Total Samples</span></div>
-      <div class="stat stat-received"><span class="stat-num" id="countReceived">0</span><span class="stat-label">Received</span></div>
-      <div class="stat stat-actioned"><span class="stat-num" id="countActioned">0</span><span class="stat-label">Actioned</span></div>
+      <div class="stat stat-received"><span class="stat-num" id="countReceived">0</span><span class="stat-label">Sent</span></div>
+      <div class="stat stat-actioned"><span class="stat-num" id="countActioned">0</span><span class="stat-label">Received/Actioned</span></div>
       <div class="stat stat-overdue"><span class="stat-num" id="countOverdue">0</span><span class="stat-label">Overdue</span></div>
     </section>
 
@@ -62,9 +62,9 @@
         <label for="filterStatus">Progress</label>
         <select id="filterStatus">
           <option value="">All statuses</option>
-          <option value="received">Received</option>
-          <option value="actioned">Actioned</option>
-          <option value="overdue">Overdue on Received</option>
+          <option value="received">Sent</option>
+          <option value="actioned">Received/Actioned</option>
+          <option value="overdue">Overdue on Sent</option>
         </select>
       </div>
       <div class="field">
@@ -136,12 +136,12 @@
         <div class="field">
           <label for="status">Status</label>
           <select id="status">
-            <option value="received">Received</option>
-            <option value="actioned">Actioned</option>
+            <option value="received">Sent</option>
+            <option value="actioned">Received/Actioned</option>
           </select>
         </div>
         <div class="field">
-          <label for="receivedDate">Date Received</label>
+          <label for="receivedDate">Date Sent</label>
           <input id="receivedDate" type="date">
         </div>
         <div class="field field-wide">

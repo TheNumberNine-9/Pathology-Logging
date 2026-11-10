@@ -10,7 +10,8 @@
     bowral: 'Bowral Dermatology',
     parkes: 'Parkes Dermatology',
   };
-  const STATUS_LABELS = { received: 'Received', actioned: 'Actioned' };
+  // Internal values are kept stable; only the labels shown change.
+  const STATUS_LABELS = { received: 'Sent', actioned: 'Received/Actioned' };
   const SPECIMENS = {
     'skin-scraping': 'Skin Scraping',
     'nail-clipping': 'Nail Clipping',
@@ -19,7 +20,7 @@
     excision: 'Excision',
     other: 'Other',
   };
-  // Days on "Received" before a sample counts as overdue.
+  // Days on "Sent" before a sample counts as overdue.
   const OVERDUE_DAYS_DEFAULT = 21; // 3 weeks
   const OVERDUE_DAYS_LONG = 42; // 6 weeks — skin scrapings and nail clippings
   const LONG_SPECIMENS = ['skin-scraping', 'nail-clipping'];
@@ -201,7 +202,7 @@
 
   function applyStatus(s, status, receivedDate) {
     // Restart the received clock (and overdue reminders) when the sample is moved
-    // back to Received, or when the received date is edited in the form.
+    // back to Sent, or when the sent date is edited in the form.
     const newDate = receivedDate || (status === 'received' && s.status !== 'received' ? isoDate(new Date()) : null);
     if (newDate && newDate !== s.receivedDate) {
       s.receivedDate = newDate;
@@ -267,9 +268,9 @@
       ['Specimen', specimenLabel(s)],
       ['Location', s.site || '—'],
       ['Date taken', formatDate(s.date)],
-      ['Received', formatDate(s.receivedDate)],
+      ['Sent', formatDate(s.receivedDate)],
     ];
-    if (s.status === 'actioned' && s.actionedDate) details.push(['Actioned', formatDate(s.actionedDate)]);
+    if (s.status === 'actioned' && s.actionedDate) details.push(['Received/Actioned', formatDate(s.actionedDate)]);
     if (s.notes) details.push(['Notes', s.notes]);
 
     const head = [
@@ -281,8 +282,8 @@
       head.push(el('span', {
         className: `wait-badge${isOverdue(s) ? ' overdue' : ''}`,
         textContent: isOverdue(s)
-          ? `Overdue · ${days} days on Received`
-          : `${days} day${days === 1 ? '' : 's'} on Received · overdue at ${overdueDays(s) / 7} wks`,
+          ? `Overdue · ${days} days on Sent`
+          : `${days} day${days === 1 ? '' : 's'} on Sent · overdue at ${overdueDays(s) / 7} wks`,
       }));
     }
 
@@ -312,7 +313,7 @@
 
     $('overdueBanner').hidden = overdue === 0;
     $('overdueText').textContent =
-      `${overdue} sample${overdue === 1 ? ' is' : 's are'} overdue on Received at ${CLINICS[clinic]} ` +
+      `${overdue} sample${overdue === 1 ? ' is' : 's are'} overdue on Sent at ${CLINICS[clinic]} ` +
       '(3+ weeks, or 6+ weeks for skin scrapings and nail clippings).';
 
     checkOverdueNotifications();
@@ -419,9 +420,9 @@
   $('showOverdue').addEventListener('click', () => showOverdue());
 
   /* ---------- notifications ---------- */
-  // A sample on "Received" triggers a reminder once it is overdue (3 weeks, or
+  // A sample on "Sent" triggers a reminder once it is overdue (3 weeks, or
   // 6 weeks for skin scrapings / nail clippings), then once every further week
-  // until it is changed to "Actioned".
+  // until it is changed to "Received/Actioned".
   // Checks run while this page is open in a browser tab.
 
   const notifyBtn = $('notifyBtn');
@@ -466,7 +467,7 @@
       for (const s of due) {
         send(
           `Pathology overdue: ${s.name} (#${s.number})`,
-          `${CLINICS[s.clinic]} · ${specimenLabel(s)} · ${s.doctor || 'No doctor set'} — on "Received" for ${daysWaiting(s)} days. Please action.`,
+          `${CLINICS[s.clinic]} · ${specimenLabel(s)} · ${s.doctor || 'No doctor set'} — on "Sent" for ${daysWaiting(s)} days and not yet received/actioned.`,
           `path-${s.id}`,
           s.clinic,
         );
@@ -474,7 +475,7 @@
     } else {
       send(
         `${due.length} pathology samples overdue`,
-        `${due.length} samples are overdue on "Received" and have not been actioned.`,
+        `${due.length} samples are overdue on "Sent" and have not been received/actioned.`,
         'path-summary',
         due[0].clinic,
       );
