@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pathology Logs — Orange &amp; Bowral Dermatology</title>
+  <link rel="icon" href="assets/logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <img src="assets/logo.png" alt="Bowral Dermatology logo" class="brand-logo">
+      <div class="brand-text">
+        <h1>Pathology Logs</h1>
+        <p>Orange and Bowral Dermatology</p>
+      </div>
+    </div>
+    <button id="openAdd" class="btn btn-primary" type="button">+ New Sample</button>
+  </header>
+
+  <main class="container">
+    <section class="summary" aria-label="Status summary">
+      <div class="stat"><span class="stat-num" id="countAll">0</span><span class="stat-label">Total Samples</span></div>
+      <div class="stat stat-pending"><span class="stat-num" id="countNotSent">0</span><span class="stat-label">Not Sent Off</span></div>
+      <div class="stat stat-sent"><span class="stat-num" id="countSent">0</span><span class="stat-label">Sent Off</span></div>
+      <div class="stat stat-closed"><span class="stat-num" id="countClosed">0</span><span class="stat-label">Closed</span></div>
+    </section>
+
+    <section class="filters" aria-label="Filters">
+      <div class="field">
+        <label for="filterName">Patient Name</label>
+        <input id="filterName" type="search" placeholder="Search by name…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="filterNumber">Patient Number</label>
+        <input id="filterNumber" type="search" placeholder="Search by number…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="filterStatus">Progress</label>
+        <select id="filterStatus">
+          <option value="">All statuses</option>
+          <option value="not-sent">Not Sent Off</option>
+          <option value="sent">Sent Off</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sortBy">Sort</label>
+        <select id="sortBy">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="number">Patient number</option>
+        </select>
+      </div>
+      <button id="clearFilters" class="btn btn-ghost" type="button">Clear</button>
+    </section>
+
+    <p class="result-count" id="resultCount" aria-live="polite"></p>
+    <section id="grid" class="grid" aria-label="Pathology samples"></section>
+    <div id="emptyState" class="empty" hidden>
+      <p class="empty-title">No samples found</p>
+      <p>Add a new sample or adjust your filters.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Orange and Bowral Dermatology · Pathology Sample Register · Records are stored in this browser only.
+  </footer>
+
+  <dialog id="sampleDialog" class="dialog">
+    <form id="sampleForm" method="dialog">
+      <h2 id="dialogTitle">New Pathology Sample</h2>
+      <input type="hidden" id="sampleId">
+      <div class="form-grid">
+        <div class="field">
+          <label for="patientName">Patient Name *</label>
+          <input id="patientName" required autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="patientNumber">Patient Number *</label>
+          <input id="patientNumber" required autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="sampleType">Specimen / Site</label>
+          <input id="sampleType" placeholder="e.g. Shave biopsy – L forearm" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="dateTaken">Date Taken</label>
+          <input id="dateTaken" type="date">
+        </div>
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="not-sent">Not Sent Off</option>
+            <option value="sent">Sent Off</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="field field-wide">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="cancelDialog">Cancel</button>
+        <button type="submit" class="btn btn-primary" value="save">Save Sample</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
