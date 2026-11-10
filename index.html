@@ -3,28 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pathology Logs — Orange &amp; Bowral Dermatology</title>
+  <title>Pathology Logs</title>
   <link rel="icon" href="assets/logo.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-header">
     <div class="brand">
+      <div class="clinic-menu">
+        <button id="clinicMenuBtn" class="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="clinicMenu" title="Select clinic">
+          <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="sr-only">Select clinic</span>
+        </button>
+        <div id="clinicMenu" class="menu-panel" role="menu" hidden>
+          <p class="menu-heading">Select Clinic</p>
+          <!-- options rendered by app.js -->
+        </div>
+      </div>
       <img src="assets/logo.png" alt="Bowral Dermatology logo" class="brand-logo">
       <div class="brand-text">
         <h1>Pathology Logs</h1>
-        <p>Orange and Bowral Dermatology</p>
+        <p id="clinicTitle">Orange Dermatology</p>
       </div>
     </div>
-    <button id="openAdd" class="btn btn-primary" type="button">+ New Sample</button>
+    <div class="header-actions">
+      <button id="notifyBtn" class="btn btn-ghost" type="button" hidden>Enable Notifications</button>
+      <button id="openAdd" class="btn btn-primary" type="button">+ New Sample</button>
+    </div>
   </header>
 
   <main class="container">
+    <div id="overdueBanner" class="banner" role="status" hidden>
+      <span id="overdueText"></span>
+      <button id="showOverdue" class="btn btn-small" type="button">View overdue</button>
+    </div>
+
     <section class="summary" aria-label="Status summary">
       <div class="stat"><span class="stat-num" id="countAll">0</span><span class="stat-label">Total Samples</span></div>
-      <div class="stat stat-pending"><span class="stat-num" id="countNotSent">0</span><span class="stat-label">Not Sent Off</span></div>
-      <div class="stat stat-sent"><span class="stat-num" id="countSent">0</span><span class="stat-label">Sent Off</span></div>
-      <div class="stat stat-closed"><span class="stat-num" id="countClosed">0</span><span class="stat-label">Closed</span></div>
+      <div class="stat stat-received"><span class="stat-num" id="countReceived">0</span><span class="stat-label">Received</span></div>
+      <div class="stat stat-actioned"><span class="stat-num" id="countActioned">0</span><span class="stat-label">Actioned</span></div>
+      <div class="stat stat-overdue"><span class="stat-num" id="countOverdue">0</span><span class="stat-label">Received &gt; 2 Weeks</span></div>
     </section>
 
     <section class="filters" aria-label="Filters">
@@ -37,12 +55,16 @@
         <input id="filterNumber" type="search" placeholder="Search by number…" autocomplete="off">
       </div>
       <div class="field">
+        <label for="filterDoctor">Doctor</label>
+        <select id="filterDoctor"><option value="">All doctors</option></select>
+      </div>
+      <div class="field">
         <label for="filterStatus">Progress</label>
         <select id="filterStatus">
           <option value="">All statuses</option>
-          <option value="not-sent">Not Sent Off</option>
-          <option value="sent">Sent Off</option>
-          <option value="closed">Closed</option>
+          <option value="received">Received</option>
+          <option value="actioned">Actioned</option>
+          <option value="overdue">Received &gt; 2 weeks</option>
         </select>
       </div>
       <div class="field">
@@ -50,6 +72,7 @@
         <select id="sortBy">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
+          <option value="waiting">Longest waiting</option>
           <option value="name">Name (A–Z)</option>
           <option value="number">Patient number</option>
         </select>
@@ -66,7 +89,7 @@
   </main>
 
   <footer class="site-footer">
-    Orange and Bowral Dermatology · Pathology Sample Register · Records are stored in this browser only.
+    <span id="footerClinic">Orange Dermatology</span> · Pathology Sample Register · Records are stored in this browser only.
   </footer>
 
   <dialog id="sampleDialog" class="dialog">
@@ -83,6 +106,18 @@
           <input id="patientNumber" required autocomplete="off">
         </div>
         <div class="field">
+          <label for="dob">DOB</label>
+          <input id="dob" type="date">
+        </div>
+        <div class="field">
+          <label for="clinic">Clinic *</label>
+          <select id="clinic" required></select>
+        </div>
+        <div class="field">
+          <label for="doctor">Doctor</label>
+          <select id="doctor"></select>
+        </div>
+        <div class="field">
           <label for="sampleType">Specimen / Site</label>
           <input id="sampleType" placeholder="e.g. Shave biopsy – L forearm" autocomplete="off">
         </div>
@@ -93,10 +128,13 @@
         <div class="field">
           <label for="status">Status</label>
           <select id="status">
-            <option value="not-sent">Not Sent Off</option>
-            <option value="sent">Sent Off</option>
-            <option value="closed">Closed</option>
+            <option value="received">Received</option>
+            <option value="actioned">Actioned</option>
           </select>
+        </div>
+        <div class="field">
+          <label for="receivedDate">Date Received</label>
+          <input id="receivedDate" type="date">
         </div>
         <div class="field field-wide">
           <label for="notes">Notes</label>
