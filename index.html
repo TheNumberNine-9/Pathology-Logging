@@ -33,9 +33,12 @@
   </header>
 
   <main class="container">
-    <div id="overdueBanner" class="banner" role="status" hidden>
-      <span id="overdueText"></span>
-      <button id="showOverdue" class="btn btn-small" type="button">View overdue</button>
+    <div id="overdueBanner" class="overdue-wrap" hidden>
+      <button id="showOverdue" class="btn overdue-btn" type="button" aria-describedby="overdueTip">
+        <span class="overdue-icon" aria-hidden="true">!</span>
+        <span id="overdueText">0 Overdue</span>
+      </button>
+      <span id="overdueTip" class="tooltip" role="tooltip">Overdue = on Sent for 3+ weeks, or 6+ weeks for skin scrapings and nail clippings</span>
     </div>
 
     <section class="summary" aria-label="Status summary">

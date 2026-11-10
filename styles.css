@@ -114,21 +114,48 @@ main { flex: 1; width: 100%; }
 .header-actions { display: flex; gap: 10px; align-items: center; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Overdue banner */
-.banner {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--red-tint);
-  border: 1px solid #f1b8c2;
-  border-left: 4px solid var(--red);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  margin-bottom: 16px;
-  color: var(--red-dark);
-  font-weight: 600;
-  font-size: .92rem;
+/* Overdue button + hover tooltip */
+.overdue-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+.overdue-wrap[hidden] { display: none; }
+.overdue-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--red); color: var(--white);
 }
-.btn-small { padding: 6px 12px; font-size: .82rem; background: var(--red); color: var(--white); }
-.btn-small:hover { background: var(--red-dark); }
+.overdue-btn:hover { background: var(--red-dark); }
+.overdue-icon {
+  display: grid; place-items: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--white); color: var(--red);
+  font-size: .75rem; font-weight: 800;
+}
+.tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  background: var(--ink);
+  color: var(--white);
+  font-size: .8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  padding: 7px 10px;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+  opacity: 0; visibility: hidden;
+  transition: opacity .12s;
+  z-index: 15;
+  pointer-events: none;
+}
+.tooltip::before {
+  content: "";
+  position: absolute; top: -5px; left: 18px;
+  border: 5px solid transparent; border-top: 0;
+  border-bottom-color: var(--ink);
+}
+.overdue-wrap:hover .tooltip,
+.overdue-wrap:focus-within .tooltip { opacity: 1; visibility: visible; }
 .btn:disabled { opacity: .6; cursor: not-allowed; }
 
 .container { max-width: 1280px; margin: 0 auto; padding: 24px 32px 48px; }
@@ -325,5 +352,4 @@ textarea { resize: vertical; }
   .filters, .form-grid { grid-template-columns: 1fr; }
   .header-actions { width: 100%; }
   .header-actions .btn { flex: 1; }
-  .banner { flex-direction: column; align-items: flex-start; }
 }

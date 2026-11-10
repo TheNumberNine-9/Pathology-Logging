@@ -312,9 +312,7 @@
     $('countOverdue').textContent = overdue;
 
     $('overdueBanner').hidden = overdue === 0;
-    $('overdueText').textContent =
-      `${overdue} sample${overdue === 1 ? ' is' : 's are'} overdue on Sent at ${CLINICS[clinic]} ` +
-      '(3+ weeks, or 6+ weeks for skin scrapings and nail clippings).';
+    $('overdueText').textContent = `${overdue} Overdue`;
 
     checkOverdueNotifications();
   }
