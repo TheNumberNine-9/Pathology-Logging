@@ -11,7 +11,18 @@
     parkes: 'Parkes Dermatology',
   };
   const STATUS_LABELS = { received: 'Received', actioned: 'Actioned' };
-  const OVERDUE_DAYS = 14;
+  const SPECIMENS = {
+    'skin-scraping': 'Skin Scraping',
+    'nail-clipping': 'Nail Clipping',
+    pbx: 'PBx',
+    cc: 'C&C',
+    excision: 'Excision',
+    other: 'Other',
+  };
+  // Days on "Received" before a sample counts as overdue.
+  const OVERDUE_DAYS_DEFAULT = 21; // 3 weeks
+  const OVERDUE_DAYS_LONG = 42; // 6 weeks — skin scrapings and nail clippings
+  const LONG_SPECIMENS = ['skin-scraping', 'nail-clipping'];
   const DAY_MS = 86400000;
   const ADD_DOCTOR = '__add__';
 
@@ -59,6 +70,8 @@
     if (OLD_STATUS[s.status]) { s.status = OLD_STATUS[s.status]; migrated = true; }
     if (!s.clinic) { s.clinic = 'bowral'; migrated = true; }
     if (!s.receivedDate) { s.receivedDate = s.date || isoDate(new Date(s.created || Date.now())); migrated = true; }
+    // The old free-text "Specimen / Site" field becomes the location field.
+    if ('type' in s) { if (s.type && !s.site) s.site = s.type; delete s.type; migrated = true; }
   }
   if (migrated) write(STORAGE_KEY, samples);
 
@@ -87,7 +100,12 @@
     const today = parseDate(isoDate(new Date()));
     return Math.max(0, Math.round((today - d) / DAY_MS));
   }
-  const isOverdue = (s) => s.status === 'received' && daysWaiting(s) >= OVERDUE_DAYS;
+  const overdueDays = (s) => (LONG_SPECIMENS.includes(s.specimen) ? OVERDUE_DAYS_LONG : OVERDUE_DAYS_DEFAULT);
+  const isOverdue = (s) => s.status === 'received' && daysWaiting(s) >= overdueDays(s);
+  function specimenLabel(s) {
+    if (s.specimen === 'other') return s.specimenOther || 'Other';
+    return SPECIMENS[s.specimen] || '—';
+  }
 
   function el(tag, props = {}, children = []) {
     const node = Object.assign(document.createElement(tag), props);
@@ -246,7 +264,8 @@
     const details = [
       ['DOB', formatDate(s.dob)],
       ['Doctor', s.doctor || '—'],
-      ['Specimen', s.type || '—'],
+      ['Specimen', specimenLabel(s)],
+      ['Location', s.site || '—'],
       ['Date taken', formatDate(s.date)],
       ['Received', formatDate(s.receivedDate)],
     ];
@@ -261,7 +280,9 @@
       const days = daysWaiting(s);
       head.push(el('span', {
         className: `wait-badge${isOverdue(s) ? ' overdue' : ''}`,
-        textContent: isOverdue(s) ? `Overdue · ${days} days on Received` : `${days} day${days === 1 ? '' : 's'} on Received`,
+        textContent: isOverdue(s)
+          ? `Overdue · ${days} days on Received`
+          : `${days} day${days === 1 ? '' : 's'} on Received · overdue at ${overdueDays(s) / 7} wks`,
       }));
     }
 
@@ -291,12 +312,27 @@
 
     $('overdueBanner').hidden = overdue === 0;
     $('overdueText').textContent =
-      `${overdue} sample${overdue === 1 ? ' has' : 's have'} been on Received for more than 2 weeks at ${CLINICS[clinic]}.`;
+      `${overdue} sample${overdue === 1 ? ' is' : 's are'} overdue on Received at ${CLINICS[clinic]} ` +
+      '(3+ weeks, or 6+ weeks for skin scrapings and nail clippings).';
 
     checkOverdueNotifications();
   }
 
   /* ---------- dialog ---------- */
+
+  $('specimen').replaceChildren(
+    el('option', { value: '', textContent: 'Select specimen…' }),
+    ...Object.entries(SPECIMENS).map(([v, t]) => el('option', { value: v, textContent: t })),
+  );
+  function syncSpecimenOther() {
+    const isOther = $('specimen').value === 'other';
+    $('specimenOtherField').hidden = !isOther;
+    $('specimenOther').required = isOther;
+  }
+  $('specimen').addEventListener('change', () => {
+    syncSpecimenOther();
+    if ($('specimen').value === 'other') $('specimenOther').focus();
+  });
 
   $('clinic').replaceChildren(...Object.entries(CLINICS).map(([v, t]) => el('option', { value: v, textContent: t })));
 
@@ -310,7 +346,10 @@
     $('dob').value = sample?.dob || '';
     $('clinic').value = sample?.clinic || clinic;
     renderDoctorOptions(sample?.doctor || '');
-    $('sampleType').value = sample?.type || '';
+    $('specimen').value = sample?.specimen || '';
+    $('specimenOther').value = sample?.specimenOther || '';
+    syncSpecimenOther();
+    $('site').value = sample?.site || '';
     $('dateTaken').value = sample?.date || today;
     $('status').value = sample?.status || 'received';
     $('receivedDate').value = sample?.receivedDate || today;
@@ -332,7 +371,9 @@
       dob: $('dob').value,
       clinic: $('clinic').value,
       doctor,
-      type: $('sampleType').value.trim(),
+      specimen: $('specimen').value,
+      specimenOther: $('specimen').value === 'other' ? $('specimenOther').value.trim() : '',
+      site: $('site').value.trim(),
       date: $('dateTaken').value,
       notes: $('notes').value.trim(),
       updated: Date.now(),
@@ -378,8 +419,9 @@
   $('showOverdue').addEventListener('click', () => showOverdue());
 
   /* ---------- notifications ---------- */
-  // A sample on "Received" triggers a reminder at 2 weeks, then once every
-  // further week (3, 4, 5…) until it is changed to "Actioned".
+  // A sample on "Received" triggers a reminder once it is overdue (3 weeks, or
+  // 6 weeks for skin scrapings / nail clippings), then once every further week
+  // until it is changed to "Actioned".
   // Checks run while this page is open in a browser tab.
 
   const notifyBtn = $('notifyBtn');
@@ -424,7 +466,7 @@
       for (const s of due) {
         send(
           `Pathology overdue: ${s.name} (#${s.number})`,
-          `${CLINICS[s.clinic]} · ${s.doctor || 'No doctor set'} — on "Received" for ${daysWaiting(s)} days. Please action.`,
+          `${CLINICS[s.clinic]} · ${specimenLabel(s)} · ${s.doctor || 'No doctor set'} — on "Received" for ${daysWaiting(s)} days. Please action.`,
           `path-${s.id}`,
           s.clinic,
         );
@@ -432,7 +474,7 @@
     } else {
       send(
         `${due.length} pathology samples overdue`,
-        `${due.length} samples have been on "Received" for 2+ weeks without being actioned.`,
+        `${due.length} samples are overdue on "Received" and have not been actioned.`,
         'path-summary',
         due[0].clinic,
       );

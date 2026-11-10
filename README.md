@@ -6,14 +6,15 @@ Open `index.html` in a browser (or host the folder on any static host, e.g. GitH
 
 ## Features
 - **Clinic menu** (☰, top left) to switch between Orange, Bowral and Parkes Dermatology. The title and the list change to match the selected clinic.
-- Log samples with patient name, patient number, **DOB**, **clinic**, **doctor**, specimen/site, date taken, date received and notes
+- Log samples with patient name, patient number, **DOB**, **clinic**, **doctor**, **specimen**, location/site, date taken, date received and notes
+- Specimen options: Skin Scraping, Nail Clipping, PBx, C&C, Excision, Other. Choosing Other shows a box to type the specimen in. Location/site is always free text.
 - Pick the doctor from a dropdown; choose "＋ Add new doctor…" to add a name to the list
 - Statuses: **Received** and **Actioned**. You can change a sample's status from its card.
-- Filters: name, number, doctor and progress, including **Received > 2 weeks**
-- A banner and counter show samples that have been on Received for 2+ weeks
+- Filters: name, number, doctor and progress, including **Overdue on Received**
+- A banner and counter show overdue samples
 
 ## Overdue notifications
-Click **Enable Notifications** in the header and allow notifications in the browser. A sample left on **Received** triggers a notification at 2 weeks, then again every week after that (3, 4, 5 weeks…) until it is marked **Actioned**. If a sample is moved back to Received, or its received date is edited, the count starts over.
+Click **Enable Notifications** in the header and allow notifications in the browser. A sample left on **Received** becomes overdue after **3 weeks**, or after **6 weeks** for **Skin Scraping** and **Nail Clipping** samples. A notification is sent when it becomes overdue, then again every week after that until it is marked **Actioned**. If a sample is moved back to Received, or its received date is edited, the count starts over.
 
 Notifications are checked when the page opens, when you switch back to its tab, and every hour while it is open. **The site must be open in a browser tab** (it can be in the background) for notifications to be sent.
 

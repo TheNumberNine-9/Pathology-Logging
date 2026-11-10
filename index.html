@@ -42,7 +42,7 @@
       <div class="stat"><span class="stat-num" id="countAll">0</span><span class="stat-label">Total Samples</span></div>
       <div class="stat stat-received"><span class="stat-num" id="countReceived">0</span><span class="stat-label">Received</span></div>
       <div class="stat stat-actioned"><span class="stat-num" id="countActioned">0</span><span class="stat-label">Actioned</span></div>
-      <div class="stat stat-overdue"><span class="stat-num" id="countOverdue">0</span><span class="stat-label">Received &gt; 2 Weeks</span></div>
+      <div class="stat stat-overdue"><span class="stat-num" id="countOverdue">0</span><span class="stat-label">Overdue</span></div>
     </section>
 
     <section class="filters" aria-label="Filters">
@@ -64,7 +64,7 @@
           <option value="">All statuses</option>
           <option value="received">Received</option>
           <option value="actioned">Actioned</option>
-          <option value="overdue">Received &gt; 2 weeks</option>
+          <option value="overdue">Overdue on Received</option>
         </select>
       </div>
       <div class="field">
@@ -118,8 +118,16 @@
           <select id="doctor"></select>
         </div>
         <div class="field">
-          <label for="sampleType">Specimen / Site</label>
-          <input id="sampleType" placeholder="e.g. Shave biopsy – L forearm" autocomplete="off">
+          <label for="specimen">Specimen *</label>
+          <select id="specimen" required></select>
+        </div>
+        <div class="field" id="specimenOtherField" hidden>
+          <label for="specimenOther">Other Specimen *</label>
+          <input id="specimenOther" placeholder="Type specimen…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="site">Location / Site</label>
+          <input id="site" placeholder="e.g. L forearm" autocomplete="off">
         </div>
         <div class="field">
           <label for="dateTaken">Date Taken</label>
